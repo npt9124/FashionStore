@@ -1,0 +1,47 @@
+﻿@page "/category/create"
+@using D05K14BlazorServerApp.Data
+@using MySql.Data.MySqlClient
+<!-- Điều hướng-->
+@inject NavigationManager navigationManager 
+<h3>Create a New Category</h3>
+
+<EditForm Model="category" OnValidSubmit="HandleCreateCategory">
+	<DataAnnotationsValidator/>
+	<div class="mb-3">
+		<label class="form-label">Name</label>
+		<InputText @bind-Value=category.CatName class="form-control" />
+		<ValidationMessage For="() => category.CatName" />
+	</div>
+	<div class="mb-3">
+		<label class="form-label">Status</label>
+		<InputSelect @bind-Value=category.IsDeleted class="form-control">
+			<option value="0">Active</option>
+			<option value="1">Delete</option>
+		</InputSelect>
+		<ValidationMessage For="() => category.IsDeleted" />
+	</div>
+	<div class="mb-3">
+		<Button Type="ButtonType.Submit" Color="ButtonColor.Success">Save</Button>
+	</div>
+</EditForm>
+
+@code {
+	private Category category = new Category();
+
+	private void HandleCreateCategory()
+	{
+		string Name = category.CatName;
+		int Status = category.IsDeleted;
+		try
+		{
+			string SqlInsert = $"INSERT INTO category(cat_name, isDeleted) VALUES('{Name}', {Status})";
+			MySqlConnection conn = DBMySQL.GetMySqlConnection();
+			conn.Open();
+			MySqlCommand cmd = conn.CreateCommand();
+			cmd.CommandText = SqlInsert;
+			cmd.ExecuteNonQuery();
+			conn.Close();
+			navigationManager.NavigateTo("category");
+		}catch(Exception ex) {}
+	}
+}
